@@ -30,14 +30,20 @@ public class AuthController {
      */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
-        String username = body.get("username");
-        String password = body.get("password");
+        String rawUsername = body.get("username");
+        String rawPassword = body.get("password");
+
+        String username = rawUsername != null ? rawUsername.trim() : null;
+        String password = rawPassword != null ? rawPassword.trim() : null;
+
+        System.out.println("Login attempt - Username: '" + rawUsername + "', Password: '" + rawPassword + "'");
 
         // Tìm user trong DB
         User user = userRepository.findByUsername(username).orElse(null);
 
         // Kiểm tra sai tài khoản hoặc mật khẩu
         if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
+            System.out.println("Login failed - User: " + (user != null ? "found" : "not found") + ", Password matched: " + (user != null ? passwordEncoder.matches(password, user.getPassword()) : "N/A"));
             return ResponseEntity.status(401).body("Sai tài khoản hoặc mật khẩu!");
         }
 
